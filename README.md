@@ -34,4 +34,4 @@
 - mariaDB or mySql
 
 ### 참고자료 : 
-https://bootstrapthemes.co/items/free-bootstrap-templates/page/3/
+https://bootstrapthemes.co/items/free-bootstrap-templates/
