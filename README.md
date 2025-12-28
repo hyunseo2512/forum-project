@@ -35,7 +35,7 @@
 - spring boot + JPA 
 - mySql
 
-### 참고자료 : 
+### 사용한 탬플릿 : 
 * https://bootstrapthemes.co/items/free-bootstrap-templates/
 * https://startbootstrap.com/themes
 * https://www.creative-tim.com/bootstrap-themes/free
