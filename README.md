@@ -1,6 +1,7 @@
 # WEB PROJECT 
 ---
-무료만 사용
+
+### Open Source Project
      
 **사이트 주제** :
 
