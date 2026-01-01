@@ -8,28 +8,55 @@
     <h3>게시물 만들기</h3>
     <form action="/board/register" method="post" enctype="multipart/form-data">
         <div class="mb-3 mt-5">
-            <label for="t" class="form-label">Title</label>
-            <input type="text" name="title" class="form-control" id="t" placeholder="Title...">
+            <label for="t" class="form-label"></label>
+            <input type="text" name="title" class="form-control" id="t" placeholder="제목*">
         </div>
+<!--        <div class="mb-3">-->
+<!--            <label for="c" class="form-label">Content</label>-->
+<!--            <textarea class="form-control" name="content" id="c" rows="5" cols="30" placeholder="Content..."></textarea>-->
+<!--        </div>-->
+
+        <!-- TOAST UI -->
         <div class="mb-3">
-            <label for="w" class="form-label">Writer</label>
-            <input type="text" name="writer" placeholder="writer"
+            <label class="form-label"></label>
+            <div id="editor"></div>
+            <!-- 에디터 내용을 담을 hidden input -->
+            <input type="hidden" name="content" id="content">
+        </div>
+
+        <div class="mb-3">
+            <label for="w" class="form-label"></label>
+            <input type="hidden" name="writer"
                    class="form-control" id="w" >
         </div>
-        <div class="mb-3">
-            <label for="c" class="form-label">Content</label>
-            <textarea class="form-control" name="content" id="c" rows="5" cols="30" placeholder="Content..."></textarea>
-        </div>
-        <!-- file upload 추가-->
-        <div class="mb-3">
-            <input type="file" name="files" class="form-control" id="file" multiple style="visibility: hidden">
-            <button type="button" class="btn btn-outline-dark" id="trigger">file upload</button>
-        </div>
-        <!--file list print-->
-        <div class="mb-3" id="fileZone">
 
-        </div>
-        <button class="btn btn-primary" id="regBtn">submit</button>
+<!--        &lt;!&ndash; file upload 추가&ndash;&gt;-->
+<!--        <div class="mb-3">-->
+<!--            <input type="file" name="files" class="form-control" id="file" multiple style="visibility: hidden">-->
+<!--            <button type="button" class="btn btn-outline-dark" id="trigger">file upload</button>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;file list print&ndash;&gt;-->
+<!--        <div class="mb-3" id="fileZone">-->
+
+<!--        </div>-->
+        <button class="btn btn-primary" id="regBtn">게시하기</button>
     </form>
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const Editor = toastui.Editor;
+            const editor = new Editor({
+                el: document.querySelector('#editor'),
+                height: '600px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                hideModeSwitch: true
+            });
+
+             document.querySelector('#registerForm').addEventListener('submit', function(e) {
+             document.querySelector('#content').value = editor.getHTML();
+            });
+        });
+    </script>
 </div>
 
