@@ -1,6 +1,7 @@
 package com.community.demo.controller;
 
 import com.community.demo.dto.UserDTO;
+import com.community.demo.entity.User;
 import com.community.demo.security.CustomAuthUser;
 import com.community.demo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/user/*")
+@RequestMapping("/user")
 @Slf4j
 @Controller
 public class UserController {
@@ -49,9 +50,14 @@ public class UserController {
 
 
     @GetMapping("/list")
-    public void list(Model model){
-        List<UserDTO> userList = userService.getList();
+    public String list(Model model) {
+        log.info(">>> Admin User List Page 접속");
+
+        // Service를 통해 데이터 확보 (Entity 리스트 반환)
+        List<User> userList = userService.getList();
+
         model.addAttribute("userList", userList);
+        return "user/list"; // templates/user/list.html
     }
 
     @GetMapping("password")
@@ -60,7 +66,7 @@ public class UserController {
     @GetMapping("/charts")
     public void charts(){}
 
-    @GetMapping("/user/modify")
+    @GetMapping("/modify")
     public String modify(@AuthenticationPrincipal CustomAuthUser customUser, Model model) {
         // 1. 로그인이 안 되어 있으면 customUser는 null입니다.
         if (customUser == null) {

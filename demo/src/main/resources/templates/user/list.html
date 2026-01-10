@@ -1,55 +1,109 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<div layout:fragment="content" class="container-md">
+<div layout:fragment="content" class="container-fluid px-4">
+    <h1 class="mt-4">회원 관리</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a th:href="@{/}">대시보드</a></li>
+        <li class="breadcrumb-item active">회원 목록</li>
+    </ol>
 
-
-            <main>
-                <div class="container-fluid px-4">
-                    <h1 class="mt-4">List</h1>
-                    <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">user-list</li>
-                    </ol>
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-table me-1"></i>
-                            DataTable Example
-                        </div>
-                        <div class="card-body">
-                            <table id="datatablesSimple" >
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>LastLogin</th>
-                                    <th>Age</th>
-                                    <th>Role</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="mvo:${userList}">
-                                    <td>[[${mvo.nickName }]]</td>
-                                    <td>[[${mvo.email }]]</td>
-                                    <td>[[${mvo.lastLogin }]]</td>
-                                    <td>22</td>
-                                    <td>
-                                        <th:block th:each="authList: ${mvo.authList}">
-                                        [[${authList.role }]]
-                                        </th:block>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4 shadow">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <span>전체 회원 수</span>
+                    <strong class="fs-4" th:text="${userList.size()}">0</strong>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header border-bottom-0 bg-white py-3">
+            <i class="fas fa-users me-1 text-primary"></i>
+            <span class="fw-bold">사용자 데이터베이스</span>
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple" class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>닉네임</th>
+                    <th>이메일</th>
+                    <th>최근 로그인</th>
+                    <th>권한</th>
+                    <th>상태</th>
+                    <th>액션</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="mvo : ${userList}">
+                    <td>
+                        <div class="fw-bold text-dark" th:text="${mvo.nickName}">닉네임</div>
+                    </td>
+                    <td th:text="${mvo.email}">이메일</td>
+                    <td>
+                        <small class="text-muted"
+                               th:text="${mvo.lastLogin != null ? #temporals.format(mvo.lastLogin, 'yyyy-MM-dd HH:mm') : '기록 없음'}">
+                        </small>
+                    </td>
+                    <td>
+                        <th:block th:each="authUser : ${mvo.authList}">
+                            <span th:if="${authUser.auth.name() == 'ADMIN'}"
+                                  class="badge bg-danger rounded-pill px-3"
+                                  th:text="${authUser.auth.title}">관리자</span>
+
+                            <span th:if="${authUser.auth.name() == 'USER'}"
+                                  class="badge bg-primary rounded-pill px-3"
+                                  th:text="${authUser.auth.title}">일반</span>
+                        </th:block>
+                    </td>
+                    <td>
+                        <span class="badge bg-success-soft text-success border border-success">정상</span>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a th:href="@{/user/modify(email=${mvo.email})}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    th:onclick="deleteUser([[${mvo.email}]])">
+                                <i class="fas fa-user-slash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
     <script th:src="@{/dist/js/simple-datatables.min.js}" crossorigin="anonymous"></script>
-    <script th:src="@{/dist/js/datatables-simple-demo.js}"></script>
+    <script th:inline="javascript">
+        window.addEventListener('DOMContentLoaded', event => {
+            const datatablesSimple = document.getElementById('datatablesSimple');
+            if (datatablesSimple) {
+                new simpleDatatables.DataTable(datatablesSimple, {
+                    labels: {
+                        placeholder: "회원 검색...",
+                        perPage: "개씩 보기",
+                        noRows: "가입된 회원이 없습니다.",
+                        info: "전체 {rows}명 중 {start}번부터 {end}번까지 표시"
+                    }
+                });
+            }
+        });
+
+        function deleteUser(email) {
+            if(confirm(email + ' 사용자를 차단하시겠습니까?')) {
+                // 비활성화 로직 (필요 시 작성)
+            }
+        }
+    </script>
+</th:block>
+</html>

@@ -17,6 +17,10 @@
             <span>Community</span>
         </a>
 
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                 aria-expanded="false" aria-label="Toggle navigation">
@@ -90,6 +94,27 @@
         document.getElementById("logout").addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('logoutForm').submit();
+        });
+
+       window.addEventListener('DOMContentLoaded', event => {
+            // 1. 클릭 이벤트 발생 시 전체 문서에서 #sidebarToggle을 찾음 (이벤트 위임)
+            document.addEventListener('click', function(e) {
+                const toggleBtn = e.target.closest('#sidebarToggle');
+
+                if (toggleBtn) {
+                    e.preventDefault();
+                    // body에 클래스 토글
+                    document.body.classList.toggle('sb-sidenav-toggled');
+
+                    // 상태 저장 (로그인 유지 시에도 사이드바 상태 기억)
+                    localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb-sidenav-toggled'));
+                }
+            });
+
+            // 2. 초기 로드 시 로컬스토리지 값 적용
+            if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
+                document.body.classList.add('sb-sidenav-toggled');
+            }
         });
     </script>
 </nav>

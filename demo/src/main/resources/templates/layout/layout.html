@@ -9,6 +9,21 @@
     <link rel="icon" th:href="@{/image/favicon.ico}">
     <link rel="stylesheet" th:href="@{/dist/css/styles.css}"/> <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
+<!--<script>-->
+<!--    window.addEventListener('DOMContentLoaded', event => {-->
+<!--        const sidebarToggle = document.body.querySelector('#sidebarToggle');-->
+<!--        if (sidebarToggle) {-->
+<!--            // 로그인 후에도 버튼이 안 먹히는 걸 방지하기 위해 이벤트를 강제로 다시 바인딩-->
+<!--            sidebarToggle.addEventListener('click', event => {-->
+<!--                event.preventDefault();-->
+<!--                document.body.classList.toggle('sb-sidenav-toggled');-->
+<!--                console.log('Sidebar toggled!'); // 작동 여부 확인용 로그-->
+<!--            });-->
+<!--        } else {-->
+<!--            console.error('버튼을 찾을 수 없습니다! ID가 #sidebarToggle 인지 확인하세요.');-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
 <body class="sb-nav-fixed"> <div th:replace="~{fragments/header :: header}"></div>
 
 <div id="layoutSidenav">

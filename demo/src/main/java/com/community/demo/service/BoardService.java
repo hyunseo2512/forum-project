@@ -7,11 +7,12 @@ import com.community.demo.entity.Board;
 import com.community.demo.entity.File;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface BoardService {
 
-    /* convertDtoToEntity */
-    default Board convertDtoToEntity(BoardDTO boardDTO){
+    // [1] Board 변환 메서드
+    default Board convertBoardToEntity(BoardDTO boardDTO){
         return Board.builder()
                 .bno(boardDTO.getBno())
                 .title(boardDTO.getTitle())
@@ -23,8 +24,7 @@ public interface BoardService {
                 .build();
     }
 
-    /* convertEntityToDto */
-    default BoardDTO convertEntityToDto(Board board){
+    default BoardDTO convertBoardToDto(Board board) {
         return BoardDTO.builder()
                 .bno(board.getBno())
                 .title(board.getTitle())
@@ -35,41 +35,47 @@ public interface BoardService {
                 .fileQty(board.getFileQty())
                 .regDate(board.getRegDate())
                 .modDate(board.getModDate())
+                .fileList(board.getFileList() != null ?
+                        board.getFileList().stream()
+                                .map(this::convertFileToDto)
+                                .collect(Collectors.toList()) : null)
                 .build();
     }
 
-    default File convertDtoToEntity(FileDTO fileDTO){
+    // [2] File 변환 메서드 (형변환 및 bno 중복 방지 반영)
+    default File convertFileToEntity(FileDTO fileDTO){
         return File.builder()
                 .uuid(fileDTO.getUuid())
                 .saveDir(fileDTO.getSaveDir())
                 .fileName(fileDTO.getFileName())
-                .fileType(fileDTO.getFileType())
-                .bno(fileDTO.getBno())
+                // int(DTO) -> String(Entity) 변환
+                .fileType(String.valueOf(fileDTO.getFileType()))
                 .fileSize(fileDTO.getFileSize())
+                // bno는 Entity에서 삭제했으므로 여기서 세팅하지 않고 ServiceImpl에서 연관관계로 처리
                 .build();
     }
 
-    default FileDTO convertEntityToDto(File file){
+    default FileDTO convertFileToDto(File file){
         return FileDTO.builder()
                 .uuid(file.getUuid())
                 .saveDir(file.getSaveDir())
                 .fileName(file.getFileName())
-                .fileType(file.getFileType())
-                .bno(file.getBno())
+                // String(Entity) -> int(DTO) 변환 (Null 체크 포함)
+                .fileType(file.getFileType() != null ? Integer.parseInt(file.getFileType()) : 0)
+                // 연관관계 Board 객체에서 bno 추출
+                .bno(file.getBoard() != null ? file.getBoard().getBno() : 0L)
                 .fileSize(file.getFileSize())
                 .regDate(file.getRegDate())
                 .modDate(file.getModDate())
                 .build();
     }
 
-
+    /* 추상 메서드들 */
     Long insert(BoardDTO boardDTO);
-
     List<BoardDTO> getList();
-
     BoardDTO getDetail(long bno);
-
     Long insert(BoardFileDTO boardFileDTO);
-
     List<FileDTO> getTodayFileList(String today);
+    List<FileDTO> getFileList(long bno);
+    List<BoardDTO> getListWithCursor(Long lastBno, int size);
 }

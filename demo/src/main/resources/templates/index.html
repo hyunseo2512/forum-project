@@ -1,77 +1,171 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th ="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 
-<div layout:fragment="content">
-    <div class="container mt-5">
-        <div class="row">
-            <!-- Blog entries-->
-            <div class="col-lg-8">
-                <!-- Featured blog post-->
+<div layout:fragment="content" class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="pb-4 mb-4 border-bottom fw-bold">Community Feed</h3>
 
-                <div class="card mb-4" th:each="board : ${boardList}">
-                    <div class="card-header d-flex ">
-                        <h2 class="card-title me-auto p-2">[[${board.title}]]</h2>
-                        <div class="small text-muted p-2">[[${board.writer}]]</div>
-                        <div class="small text-muted p-2">[[${#strings.substring(board.regDate,0,10)}]]</div>
-                    </div>
-                    <img class="card-img-top" src="https://dummyimage.com/850x350/dee2e6/6c757d.jpg" alt="..." />
-                    <div class="card-body">
-                        <p class="card-text">[[${board.content}]]</p>
-                        <a class="btn btn-primary" th:href="@{/board/detail(bno=${board.bno})}">Read more →</a>
-                    </div>
-                </div>
+            <div id="board-container">
+                <th:block th:fragment="boardItems">
+                    <div th:each="board : ${boardList}" class="board-item card mb-4 shadow-sm border-0" th:data-bno="${board.bno}">
+                        <div class="card-header bg-white py-3 d-flex align-items-center">
+                            <h5 class="fw-bold mb-0 me-auto">[[${board.title}]]</h5>
+                            <div class="small text-muted">
+                                <span class="border-end pe-2">[[${board.writer}]]</span>
+                                <span class="ps-2">[[${#strings.substring(board.regDate, 0, 10)}]]</span>
+                            </div>
+                        </div>
 
-                <!-- Pagination -->
-                <nav aria-label="Pagination">
-                    <hr class="my-0" />
-                    <ul class="pagination justify-content-center my-4">
-                        <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Newer</a></li>
-                        <li class="page-item active" aria-current="page"><a class="page-link" href="#!">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#!">Older</a></li>
-                    </ul>
-                </nav>
+                        <div class="ratio ratio-21x9 overflow-hidden bg-light">
+                            <img class="card-img-top object-fit-cover"
+                                 th:src="${(board.fileList != null and !board.fileList.isEmpty())
+                                          ? '/upload/' + board.fileList[0].saveDir + '/' + board.fileList[0].uuid + '_' + board.fileList[0].fileName
+                                          : 'https://dummyimage.com/850x350/dee2e6/6c757d.jpg'}"
+                                 alt="게시글 이미지" />
+                        </div>
+
+                        <div class="card-body">
+                            <p class="card-text text-truncate-2 text-secondary">[[${board.content}]]</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a class="btn btn-primary btn-sm rounded-pill px-4"
+                                   th:href="@{/board/detail(bno=${board.bno})}"
+                                   th:onclick="saveRecentView([[${board.bno}]], [[${board.title}]])">상세보기</a>
+                                <small class="text-muted">
+                                    <i class="fas fa-eye me-1"></i>[[${board.readCount}]]
+                                    <i class="fas fa-comment ms-2 me-1"></i>[[${board.cmtQty}]]
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
             </div>
-            <!-- right Side widgets-->
-            <div class="col-lg-2">
-                <!-- Categories widget-->
-                <div class="card mb-4">
-                    <div class="card-header">카테고리</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <ul class="list-unstyled mb-0">
-                                    <li><a href="#!">Web Design</a></li>
-                                    <li><a href="#!">HTML</a></li>
-                                    <li><a href="#!">Freebies</a></li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-6">
-                                <ul class="list-unstyled mb-0">
-                                    <li><a href="#!">JavaScript</a></li>
-                                    <li><a href="#!">CSS</a></li>
-                                    <li><a href="#!">Tutorials</a></li>
-                                </ul>
-                            </div>
-                        </div>
+
+            <div id="scroll-trigger" class="text-center py-5">
+                <div id="loading-spinner" class="spinner-border text-primary" role="status" style="display: none;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-dark text-white fw-bold py-3">
+                        <i class="fas fa-history me-2"></i>최근 본 게시물
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush" id="recent-view-list">
+                        </ul>
                     </div>
                 </div>
-                <!-- Side widget-->
-                <div class="card mb-4">
-                    <div class="card-header">최근 게시물</div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <ul class="list-unstyled mx-3 mb-0">
-                                <li><a href="#!">Linux</a></li>
-                                <li><a href="#!">Vim</a></li>
-                                <li><a href="#!">Fedora</a></li>
-                                <li><a href="#!">...</a></li>
-                            </ul>
-                        </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-4">
+                        <p class="text-muted small mb-0">© 2026 Forum Project Community</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <style>
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 3rem;
+        }
+        .object-fit-cover {
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .board-item:hover .object-fit-cover {
+            transform: scale(1.03);
+        }
+    </style>
+
+    <script th:inline="javascript">
+        /* [1] 최근 방문 게시물 관리 (LocalStorage) */
+        function saveRecentView(bno, title) {
+            let recent = JSON.parse(localStorage.getItem('recentViews') || '[]');
+            recent = recent.filter(item => item.bno !== bno); // 중복 제거
+            recent.unshift({bno, title}); // 앞에 추가
+            if(recent.length > 5) recent.pop(); // 최대 5개 유지
+            localStorage.setItem('recentViews', JSON.stringify(recent));
+        }
+
+        function renderRecentViews() {
+            const container = document.getElementById('recent-view-list');
+            const recent = JSON.parse(localStorage.getItem('recentViews') || '[]');
+            if(recent.length === 0) {
+                container.innerHTML = '<li class="list-group-item text-muted small py-3 text-center">방문 기록이 없습니다.</li>';
+                return;
+            }
+            container.innerHTML = recent.map(item => `
+                <li class="list-group-item small border-0 py-2">
+                    <a href="/board/detail?bno=${item.bno}" class="text-decoration-none text-dark d-block text-truncate">
+                        <i class="fas fa-file-alt me-2 text-muted"></i>${item.title}
+                    </a>
+                </li>
+            `).join('');
+        }
+
+        /* [2] 커서 기반 무한 스크롤 (Intersection Observer) */
+        let isFetching = false;
+        let hasMore = true;
+
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !isFetching && hasMore) {
+                fetchNextPage();
+            }
+        }, { threshold: 0.1 });
+
+        function fetchNextPage() {
+            const boardItems = document.querySelectorAll('.board-item');
+            if (boardItems.length === 0) return;
+
+            const lastItem = boardItems[boardItems.length - 1];
+            const lastBno = lastItem.dataset.bno;
+
+            isFetching = true;
+            document.getElementById('loading-spinner').style.display = 'inline-block';
+
+            // 서버에 Fragment만 요청 (X-Requested-With 헤더 포함)
+            fetch(`/?lastBno=${lastBno}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => {
+                if(!res.ok) throw new Error("로드 실패");
+                return res.text();
+            })
+            .then(html => {
+                if (html.trim().length < 20) { // 더이상 데이터가 없음
+                    hasMore = false;
+                    document.getElementById('scroll-trigger').innerHTML = '<div class="text-muted small">모든 게시물을 다 읽었습니다.</div>';
+                } else {
+                    document.getElementById('board-container').insertAdjacentHTML('beforeend', html);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                isFetching = false;
+                document.getElementById('loading-spinner').style.display = 'none';
+            });
+        }
+
+        // 초기 실행
+        window.onload = () => {
+            renderRecentViews();
+            const trigger = document.getElementById('scroll-trigger');
+            if(trigger) observer.observe(trigger);
+        };
+    </script>
+</th:block>
+</html>

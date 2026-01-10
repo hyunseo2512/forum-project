@@ -33,4 +33,5 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Override
     @EntityGraph(attributePaths = {"authList"})
     Optional<User> findById(String email);
+
 }

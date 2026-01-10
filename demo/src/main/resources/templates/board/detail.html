@@ -1,113 +1,153 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
-<div layout:fragment="content" class="container-md" th:with="board = ${board}">
+<div layout:fragment="content" class="container-fluid px-4" th:with="board = ${board}">
+  <h1 class="mt-4">게시글 상세 보기</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Board Detail</li>
+  </ol>
 
-  <h3 class="mt-5"> [ no. [[${board.bno}]] ] detail page</h3>
-  <form action="/board/modify" method="post" id="modForm" enctype="multipart/form-data">
-    <div class="container mt-5">
-      <div class="row">
-        <!-- Blog entries-->
-        <div class="col-lg-8">
-          <!-- Featured blog post-->
-          <div class="card mb-4" >
-            <div class="card-header d-flex ">
-              <h2 class="card-title me-auto p-2">[[${board.title}]]</h2>
-              <div class="small text-muted p-2">[[${board.writer}]]</div>
-              <div class="small text-muted p-2">[[${#strings.substring(board.regDate,0,10)}]]</div>
-            </div>
-            <img class="card-img-top" src="https://dummyimage.com/850x350/dee2e6/6c757d.jpg" alt="..." />
-            <div class="card-body">
-              <p class="card-text">[[${board.content}]]</p>
-            </div>
-            <div id="comment">
-              <div class="input-group my-3" sec:authorize="isAuthenticated()">
-                <span class="input-group-text" id="cmtWriter">tester</span>
-                <input type="text" id="cmtText" class="form-control" placeholder="Add Comment..." aria-label="Username" aria-describedby="basic-addon1">
-                <button type="button" id="cmtAddBtn" class="btn btn-primary">post</button>
-              </div>
-              <!-- comment spread -->
-              <ul class="list-group list-group-flush" id="cmtListArea">
-                <li class="list-group-item">
-                  <div class="ms-2 me-auto">
-                    <div class="fw-bold">writer</div>
-                    content
-                  </div>
-                  <span class="badge text-bg-primary">reg_date</span>
-                </li>
-              </ul>
-              <!-- moreBtn -->
-              <div class="input-group my-3">
-                <button type="button" class="btn btn-info" id="moreBtn" data-page="1" style="visibility: hidden">more</button>
-              </div>
-              <!--model-->
-              <div class="modal" tabindex="-1" id="commentModal">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="cmtWriterMod">Tester</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <input type="text" class="form-control" id="cmtTextMod">
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary" id="cmtModBtn">changes</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card mb-4 shadow">
 
+        <div th:if="${board.fileList != null && !board.fileList.isEmpty()}"
+             id="boardImageCarousel" class="carousel slide card-img-top" data-bs-ride="carousel">
+
+          <div class="carousel-indicators">
+            <button th:each="file, iterStat : ${board.fileList}"
+                    type="button"
+                    data-bs-target="#boardImageCarousel"
+                    th:data-bs-slide-to="${iterStat.index}"
+                    th:classappend="${iterStat.first} ? 'active'"
+                    aria-current="true">
+            </button>
+          </div>
+
+          <div class="carousel-inner bg-dark" style="max-height: 500px; overflow: hidden;">
+            <div th:each="file, iterStat : ${board.fileList}"
+                 class="carousel-item"
+                 th:classappend="${iterStat.first} ? 'active'">
+              <img th:src="|/view?fileName=${file.saveDir}/${file.uuid}_${file.fileName}|"
+                   class="d-block w-100 h-100"
+                   style="object-fit: contain;" alt="board image">
             </div>
+          </div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <i class="fas fa-file-alt me-1"></i>
+            <strong class="fs-4">[[${board.title}]]</strong>
+          </div>
+          <div class="text-muted small">
+            <span><i class="fas fa-user me-1"></i>[[${board.writer}]]</span>
+            <span class="ms-3"><i class="fas fa-calendar-alt me-1"></i>[[${#temporals.format(board.regDate, 'yyyy-MM-dd HH:mm')}]]</span>
+            <span class="ms-3"><i class="fas fa-eye me-1"></i>[[${board.readCount}]]</span>
           </div>
         </div>
-        <!-- right Side widgets-->
-        <div class="col-lg-2">
-          <!-- Categories widget-->
-          <div class="card mb-4">
-            <div class="card-header">카테고리</div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-sm-6">
-                  <ul class="list-unstyled mb-0">
-                    <li><a href="#!">Web Design</a></li>
-                    <li><a href="#!">HTML</a></li>
-                    <li><a href="#!">Freebies</a></li>
-                  </ul>
-                </div>
-                <div class="col-sm-6">
-                  <ul class="list-unstyled mb-0">
-                    <li><a href="#!">JavaScript</a></li>
-                    <li><a href="#!">CSS</a></li>
-                    <li><a href="#!">Tutorials</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+
+        <img th:unless="${board.fileList != null && !board.fileList.isEmpty()}"
+             src="https://dummyimage.com/850x350/dee2e6/6c757d.jpg" class="card-img-top" alt="no image" />
+
+
+
+        <div class="card-body" style="min-height: 300px;">
+          <p class="card-text text-dark" style="white-space: pre-wrap;">[[${board.content}]]</p>
+        </div>
+
+        <div class="card-footer bg-light">
+          <h5 class="mb-3"><i class="fas fa-comments me-1"></i> Comments ([[${board.cmtQty}]])</h5>
+
+          <div class="input-group mb-3" sec:authorize="isAuthenticated()">
+            <span class="input-group-text bg-primary text-white" id="cmtWriter">[[${#authentication.name}]]</span>
+            <input type="text" id="cmtText" class="form-control" placeholder="댓글을 입력하세요...">
+            <button type="button" id="cmtAddBtn" class="btn btn-primary">등록</button>
           </div>
-          <!-- Side widget-->
-          <div class="card mb-4">
-            <div class="card-header">최근 게시물</div>
-            <div class="row">
-              <div class="col-sm-6">
-                <ul class="list-unstyled mx-3 mb-0">
-                  <li><a href="#!">Linux</a></li>
-                  <li><a href="#!">Vim</a></li>
-                  <li><a href="#!">Fedora</a></li>
-                  <li><a href="#!">...</a></li>
-                </ul>
-              </div>
-            </div>
+
+          <ul class="list-group list-group-flush" id="cmtListArea">
+          </ul>
+
+          <div class="d-grid mt-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="moreBtn" style="display: none;">더보기</button>
           </div>
         </div>
       </div>
-  </form>
+
+      <div class="mb-4">
+        <a th:href="@{/}" class="btn btn-secondary">목록으로</a>
+        <a th:if="${#authentication.name == board.writer}"
+           th:href="@{/board/modify(bno=${board.bno})}" class="btn btn-warning text-white">수정하기</a>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-list me-1"></i>카테고리</div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0 row">
+            <li class="col-6"><a href="#!">Spring Boot</a></li>
+            <li class="col-6"><a href="#!">Java 17</a></li>
+            <li class="col-6"><a href="#!">JPA/Hibernate</a></li>
+            <li class="col-6"><a href="#!">Thymeleaf</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-info-circle me-1"></i>공지사항</div>
+        <div class="card-body small">게시판 이용 시 비방이나 욕설은 삼가주시기 바랍니다. 이미지 업로드는 최대 5장까지 가능합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">댓글 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" id="cmtTextMod">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="cmtModBtn">수정 완료</button>
+          <button type="button" class="btn btn-danger" id="cmtDelBtn">삭제</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script th:inline="javascript">
     const bnoValue = [[${board.bno}]];
+    const currentUser = [[${#authentication.name}]];
+
+    // 사이드바 토글이 boardComment.js 에러로 인해 멈추는 것을 방지하기 위한 강제 바인딩
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.onclick = function(e) {
+                e.preventDefault();
+                document.body.classList.toggle('sb-sidenav-toggled');
+            };
+        }
+    });
   </script>
   <script th:src="@{/js/boardComment.js}"></script>
 </div>
+</html>

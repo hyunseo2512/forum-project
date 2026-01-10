@@ -56,7 +56,7 @@ public interface UserService {
 
     String register(UserDTO userDTO);
 
-    List<UserDTO> getList();
+    List<User> getList();
 
     void modify(UserDTO userDTO);
 }

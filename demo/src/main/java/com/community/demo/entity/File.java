@@ -1,27 +1,36 @@
 package com.community.demo.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "board")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class File extends TimeBase{
+@Entity
+@Table(name = "file")
+public class File extends TimeBase {
+
     @Id
     private String uuid;
-    @Column(name = "save_dir", nullable = false)
+
+    @Column(name = "save_dir")
     private String saveDir;
-    @Column(name = "file_name", nullable = false)
+
+    @Column(name = "file_name")
     private String fileName;
-    @Column(name = "file_type", nullable = false, columnDefinition = "int default 0")
-    private int fileType;
-    private long bno;
+
+    @Column(name = "file_type")
+    private String fileType;
+
     @Column(name = "file_size")
     private long fileSize;
+
+    // [수정 포인트] 기존의 private Long bno; 필드는 삭제하세요.
+    // 대신 아래의 연관관계 필드가 DB의 'bno' 컬럼을 관리합니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bno")
+    private Board board;
 }

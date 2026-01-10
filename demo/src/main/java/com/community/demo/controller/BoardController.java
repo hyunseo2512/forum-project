@@ -32,24 +32,33 @@ public class BoardController {
     public void register(){}
 
     @PostMapping("/register")
-    public String register(BoardDTO boardDTO, Model model
-                           , @RequestParam(name = "files", required = false) MultipartFile[] files){
+    public String register(BoardDTO boardDTO,
+                           @RequestParam(name = "files", required = false) MultipartFile[] files) {
+
         List<FileDTO> fileList = null;
-        if(files != null && files[0].getSize() > 0){
+        if(files != null && files.length > 0 && files[0].getSize() > 0){
             fileList = fileHandler.uploadFile(files);
         }
-        log.info(">>> fileList >> {}", fileList);
 
+        // 1. 먼저 변수를 생성 (이 라인이 서비스 호출보다 위에 있어야 합니다!)
         BoardFileDTO boardFileDTO = new BoardFileDTO(boardDTO, fileList);
+
+        // 2. 생성된 변수를 서비스에 전달
         Long bno = boardService.insert(boardFileDTO);
 
-        return "redirect:/";
+        return "redirect:/board/detail?bno=" + bno;
     }
 
     @GetMapping("/detail")
     public void detail(@RequestParam("bno") long bno, Model model){
+        // 1. 게시글 정보 가져오기
         BoardDTO boardDTO = boardService.getDetail(bno);
+
+        // 2. 해당 게시글의 파일 리스트 가져오기 (서비스에 이 로직이 있어야 함)
+        List<FileDTO> fileList = boardService.getFileList(bno);
+        boardDTO.setFileList(fileList);
+
         model.addAttribute("board", boardDTO);
-        log.info(">>> board >> {}", boardDTO);
+        log.info(">>> board with files >> {}", boardDTO);
     }
 }

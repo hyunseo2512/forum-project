@@ -53,12 +53,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserDTO> getList() {
-        List<User> userList = userRepository.findAllWithAuthList();
-
-        return userList.stream()
-                .map(this::convertEntityToDTO)
-                .toList();
+    @Transactional(readOnly = true) // 단순 조회 시 성능 이점
+    public List<User> getList() {
+        log.info(">>> 관리자용 회원 목록 조회 서비스 호출");
+        // UserRepository에 작성한 fetch join 쿼리 호출
+        return userRepository.findAllWithAuthList();
     }
 
     @Override
