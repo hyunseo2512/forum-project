@@ -2,67 +2,55 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
-<div id="registerForm" layout:fragment="content" class="container-md mt-5">
-    <h3>게시물 만들기</h3>
-    <form action="/board/register" method="post" enctype="multipart/form-data">
-        <div class="mb-3 mt-5">
-            <label for="t" class="form-label"></label>
-            <input type="text" name="title" class="form-control" id="t" placeholder="제목*">
+<div layout:fragment="content">
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">게시물 만들기</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Board Register</li>
+        </ol>
+
+        <div class="card mb-4 shadow">
+            <div class="card-header">
+                <i class="fas fa-pen-nib me-1"></i>
+                새 게시글 작성
+            </div>
+            <div class="card-body">
+                <form th:action="@{/board/register}" method="post" enctype="multipart/form-data">
+
+                    <input type="hidden" name="writer" th:value="${#authentication.name}">
+
+
+                    <div class="mb-3">
+                        <label class="small mb-1" for="title">제목</label>
+                        <input type="text" name="title" class="form-control" id="title"
+                               placeholder="제목을 입력하세요" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small mb-1" for="content">내용</label>
+                        <textarea name="content" class="form-control" id="content"
+                                  rows="10" placeholder="내용을 입력하세요" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small mb-1" for="files">이미지 첨부 (최대 5개)</label>
+                        <input type="file" name="files" class="form-control" id="files"
+                               accept="image/*" multiple>
+                        <div id="fileHelp" class="form-text">이미지 파일만 업로드 가능합니다.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end border-top pt-3">
+                        <a th:href="@{/}" class="btn btn-secondary me-2">취소</a>
+                        <button type="submit" class="btn btn-primary px-4">게시하기</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <!-- TOAST UI -->
-        <div class="mb-3">
-            <label class="form-label"></label>
-            <div id="editor"></div>
-            <!-- 에디터 내용을 담을 hidden input -->
-            <input type="hidden" name="content" id="content">
-        </div>
-
-        <div class="mb-3">
-            <label for="w" class="form-label"></label>
-            <input type="hidden" name="writer"
-                   class="form-control" id="w" th:value="${#authentication.name}">
-        </div>
-
-        <button class="btn btn-primary" id="regBtn">게시하기</button>
-    </form>
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const Editor = toastui.Editor;
-            const editor = new Editor({
-                el: document.querySelector('#editor'),
-                height: '600px',
-                initialEditType: 'wysiwyg',
-                previewStyle: 'vertical',
-                hideModeSwitch: true,
-                 hooks: {
-                    addImageBlobHook: async (blob, callback) => {
-                        // FormData로 이미지 업로드
-                        const formData = new FormData();
-                        formData.append('image', blob);
-
-                        try {
-                            const response = await fetch('/upload/image', {
-                                method: 'POST',
-                                body: formData
-                            });
-                            const data = await response.json();
-                            // 업로드된 이미지 URL을 에디터에 삽입
-                            callback(data.url, '이미지');
-                        } catch (error) {
-                            console.error('이미지 업로드 실패:', error);
-                        }
-                    }
-                }
-            });
-
-             document.querySelector('#registerForm').addEventListener('submit', function(e) {
-             document.querySelector('#content').value = editor.getHTML();
-            });
-        });
-    </script>
+    </div>
 </div>
 
+</html>

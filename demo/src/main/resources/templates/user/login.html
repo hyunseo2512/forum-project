@@ -3,23 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
-
 <div layout:fragment="content" class="container-md">
-    <form action="/user/login" method="post">
-<!--        <div class="mb-3">-->
-<!--            <label for="e" class="form-label">email</label>-->
-<!--            <input type="text" class="form-control" name="email" id="e" placeholder="test@test.com">-->
-<!--        </div>-->
-<!--        <div class="mb-3">-->
-<!--            <label for="p" class="form-label">pwd</label>-->
-<!--            <input type="password" class="form-control" name="pwd" id="p" placeholder="password...">-->
-<!--        </div>-->
-<!--        <div class="text-danger m-2" th:if="${errMsg ne null}">-->
-<!--            [[${errMsg}]] / [[${email}]]-->
-<!--        </div>-->
-<!--        <button type="submit" class="btn btn-primary">login</button>-->
-<!--    </form>-->
-
     <div id="layoutAuthentication">
         <div id="layoutAuthentication_content">
             <main>
@@ -27,29 +11,53 @@
                     <div class="row justify-content-center">
                         <div class="col-lg-5">
                             <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                <div class="card-header"><h3 class="text-center font-weight-light my-4">Login</h3></div>
+                                <div class="card-header">
+                                    <h3 class="text-center font-weight-light my-4">Login</h3>
+                                </div>
                                 <div class="card-body">
-                                    <form>
+                                    <form th:action="@{/user/login}" method="post">
                                         <div class="form-floating mb-3">
-                                            <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" />
+                                            <input class="form-control" id="inputEmail" name="email"
+                                                   type="email" placeholder="name@example.com" required/>
                                             <label for="inputEmail">Email address</label>
                                         </div>
                                         <div class="form-floating mb-3">
-                                            <input class="form-control" id="inputPassword" name="pwd" type="password" placeholder="Password" />
+                                            <input class="form-control" id="inputPassword" name="pwd"
+                                                   type="password" placeholder="Password" required/>
                                             <label for="inputPassword">Password</label>
                                         </div>
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
-                                            <label class="form-check-label" for="inputRememberPassword">Remember Password</label>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+
+                                        <div class="d-flex align-items-center justify-content-between mt-4 mb-3">
                                             <a class="small" th:href="@{/user/password}">Forgot Password?</a>
-                                            <button type="submit" class="btn btn-primary">login</button>
+                                            <button type="submit" class="btn btn-primary px-4">Login</button>
+                                        </div>
+
+                                        <div class="position-relative my-4">
+                                            <hr>
+                                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">OR</span>
+                                        </div>
+
+                                        <div class="d-grid gap-2">
+                                            <a th:href="@{/oauth2/authorization/google}" class="btn btn-dark" style="text-transform: none">
+                                            <img width="18px" style="margin-bottom:3px; margin-right:10px" alt="Google sign-in"
+                                                 src="https://img.icons8.com/color/48/000000/google-logo.png" />
+                                            Login with Google
+                                            </a>
+                                            <a th:href="@{/oauth2/authorization/naver}" class="btn btn-success"
+                                               style="background-color: #03C75A; border: none;">
+                                                <span class="fw-bold">N</span> <span
+                                                    class="ms-2">Login with Naver</span>
+                                            </a>
+                                            <a th:href="@{/oauth2/authorization/kakao}" class="btn btn-warning"
+                                               style="background-color: #FEE500; border: none; color: #191919;">
+                                                <i class="fas fa-comment me-2"></i> Login with Kakao
+                                            </a>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="card-footer text-center py-3">
-                                    <div class="small"><a th:href="@{/user/join}">Need an account? Sign up!</a></div>
+                                    <div class="small"><a th:href="@{/user/join}">Need an account? Sign up!</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -57,9 +65,5 @@
                 </div>
             </main>
         </div>
-        <div id="layoutAuthentication_footer">
-
-        </div>
     </div>
-</form>
 </div>

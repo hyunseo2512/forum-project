@@ -3,131 +3,93 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 >
-<div th:fragment="header">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
-                <!-- 로고1 -->
-<!--                <svg width="32" height="32" viewBox="0 0 32 32" class="me-2">-->
-<!--                    &lt;!&ndash; 메인 캐릭터 머리 &ndash;&gt;-->
-<!--                    <circle cx="16" cy="16" r="12" fill="#4A90E2"/>-->
-<!--                    &lt;!&ndash; 눈 &ndash;&gt;-->
-<!--                    <circle cx="12" cy="14" r="2" fill="white"/>-->
-<!--                    <circle cx="20" cy="14" r="2" fill="white"/>-->
-<!--                    <circle cx="12.5" cy="14" r="1" fill="#2C3E50"/>-->
-<!--                    <circle cx="20.5" cy="14" r="1" fill="#2C3E50"/>-->
-<!--                    &lt;!&ndash; 미소 &ndash;&gt;-->
-<!--                    <path d="M 11 19 Q 16 22 21 19" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>-->
-<!--                    &lt;!&ndash; 귀 (채팅 말풍선처럼) &ndash;&gt;-->
-<!--                    <circle cx="6" cy="12" r="3" fill="#5BA3F5"/>-->
-<!--                    <circle cx="26" cy="12" r="3" fill="#5BA3F5"/>-->
-<!--                </svg>-->
-                <!-- 로고2 -->
-                <svg width="32" height="32" viewBox="0 0 32 32" class="me-2">
-                    <rect x="4" y="6" width="24" height="18" rx="4" fill="#4A90E2"/>
-                    <path d="M 10 24 L 8 28 L 12 24 Z" fill="#4A90E2"/>
-                    <circle cx="12" cy="15" r="2" fill="white"/>
-                    <circle cx="20" cy="15" r="2" fill="white"/>
-                    <path d="M 12 18 Q 16 20 20 18" stroke="white" stroke-width="1.5" fill="none"/>
-                </svg>
 
-                <span>Community</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <div class="flex-grow-1"></div>
-                <form class="d-flex mx-auto" role="search" style="max-width: 400px;">
+<nav class="sb-topnav navbar navbar-expand bg-light" th:fragment="header">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+            <svg width="32" height="32" viewBox="0 0 32 32" class="me-2">
+                <rect x="4" y="6" width="24" height="18" rx="4" fill="#4A90E2"/>
+                <path d="M 10 24 L 8 28 L 12 24 Z" fill="#4A90E2"/>
+                <circle cx="12" cy="15" r="2" fill="white"/>
+                <circle cx="20" cy="15" r="2" fill="white"/>
+                <path d="M 12 18 Q 16 20 20 18" stroke="white" stroke-width="1.5" fill="none"/>
+            </svg>
+            <span>Community</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <form class="d-flex mx-auto" role="search" style="max-width: 400px; width: 100%;">
+                <div class="input-group custom-search-group">
                     <button class="btn btn-outline-primary" type="submit">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                        </svg>
+                        <i class="fas fa-search"></i>
                     </button>
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-                </form>
-                <ul class="navbar-nav flex-grow-1 justify-content-end">
-                    <li class="nav-item" sec:authorize="isAnonymous()">
-                        <a class="nav-link active" aria-current="page" th:href="@{/user/login}">
-                            <button type="button" class="btn btn-secondary">Login</button></a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAnonymous()">
-                        <a class="nav-link active" aria-current="page" th:href="@{/user/join}">
-                            <button type="button" class="btn btn-secondary">SignUp</button></a>
-                    </li>
-                    <!-- 채팅 -->
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots" viewBox="0 0 16 16">
-                                <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
-                                <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9 9 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.4 10.4 0 0 1-.524 2.318l-.003.011a11 11 0 0 1-.244.637c-.079.186.074.394.273.362a22 22 0 0 0 .693-.125m.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8 8 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a11 11 0 0 0 .398-2"/>
-                            </svg>
-                        </a>
-                    </li>
-                    <!-- 글쓰기 -->
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link active" aria-current="page" th:href="@{/board/register}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
-                                <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5z"/>
-                                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
-                            </svg>
-                            만들기
-                        </a>
-                    </li>
-                    <!-- 알림 -->
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
-                                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
-                            </svg>
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/user/modify}">[[${#authentication.name}]]</a>
-                    </li>
-                    <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
-                        <a class="nav-link" th:href="@{/user/list}">UserList</a>
-                    </li>
-                    <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" id="logout" href="">Logout</a>
-                        <form action="/user/logout" method="post" id="logoutForm"></form>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+                    <input class="form-control" type="search" placeholder="Search" aria-label="Search"/>
+                </div>
+            </form>
 
-<!--    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">-->
-<!--        &lt;!&ndash; Navbar Brand&ndash;&gt;-->
-<!--        <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>-->
-<!--        &lt;!&ndash; Sidebar Toggle&ndash;&gt;-->
-<!--        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>-->
-<!--        &lt;!&ndash; Navbar Search&ndash;&gt;-->
-<!--        <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">-->
-<!--            <div class="input-group">-->
-<!--                <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />-->
-<!--                <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--        &lt;!&ndash; Navbar&ndash;&gt;-->
-<!--        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">-->
-<!--            <li class="nav-item dropdown">-->
-<!--                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>-->
-<!--                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">-->
-<!--                    <li><a class="dropdown-item" href="#!">Settings</a></li>-->
-<!--                    <li><a class="dropdown-item" href="#!">Activity Log</a></li>-->
-<!--                    <li><hr class="dropdown-divider" /></li>-->
-<!--                    <li><a class="dropdown-item" href="#!">Logout</a></li>-->
-<!--                </ul>-->
-<!--            </li>-->
-<!--        </ul>-->
-<!--    </nav>-->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/user/login}">
+                        <button type="button" class="btn btn-sm btn-primary">Login</button>
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/user/join}">
+                        <button type="button" class="btn btn-sm btn-primary">SignUp</button>
+                    </a>
+                </li>
+
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link px-2 text-black" th:href="@{/}" >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots" viewBox="0 0 16 16">
+                            <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+                            <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9 9 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.4 10.4 0 0 1-.524 2.318l-.003.011a11 11 0 0 1-.244.637c-.079.186.074.394.273.362a22 22 0 0 0 .693-.125m.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8 8 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a11 11 0 0 0 .398-2"/>
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link px-2 text-black" th:href="@{/board/register}" title="글쓰기">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-plus-square" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                        </svg>
+                        만들기
+                        <i class="bi bi-file-plus fs-5"></i>
+                    </a>
+                </li>
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+
+                    <a class="nav-link dropdown-toggle text-black" id="navbarDropdown" href="#" role="button"
+                       data-bs-toggle="dropdown">
+                        <span th:text="${#authentication.principal.user.nickName}">사용자</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/user/modify}">Profile</a></li>
+                        <li sec:authorize="hasAnyAuthority('ROLE_ADMIN')"><a class="dropdown-item"
+                                                                             th:href="@{/user/list}">User List</a></li>
+                        <li>
+                            <hr class="dropdown-divider"/>
+                        </li>
+                        <li><a class="dropdown-item" id="logout" href="">Logout</a>
+                            <form action="/user/logout" method="post" id="logoutForm"></form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
     <script>
-        document.getElementById("logout").addEventListener('click',(e)=>{
+        document.getElementById("logout").addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('logoutForm').submit();
         });
     </script>
-</div>
+</nav>
