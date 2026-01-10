@@ -1,56 +1,68 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
-<div layout:fragment="content">
-    <div class="container-fluid px-4">
-        <h1 class="mt-4">게시물 만들기</h1>
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Board Register</li>
-        </ol>
+<div layout:fragment="content" class="container-fluid px-4">
+    <h1 class="mt-4">게시물 만들기</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Board Register</li>
+    </ol>
 
-        <div class="card mb-4 shadow">
-            <div class="card-header">
-                <i class="fas fa-pen-nib me-1"></i>
-                새 게시글 작성
-            </div>
-            <div class="card-body">
-                <form th:action="@{/board/register}" method="post" enctype="multipart/form-data">
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-pen-nib me-1"></i>
+            새 게시글 작성
+        </div>
+        <div class="card-body p-4">
+            <form th:action="@{/board/register}" method="post" enctype="multipart/form-data">
 
-                    <input type="hidden" name="writer" th:value="${#authentication.name}">
+                <input type="hidden" name="writer" th:value="${#authentication.principal.nickName}">
 
 
-                    <div class="mb-3">
-                        <label class="small mb-1" for="title">제목</label>
-                        <input type="text" name="title" class="form-control" id="title"
-                               placeholder="제목을 입력하세요" required>
+                <div class="mb-3">
+                    <label class="small mb-1 fw-bold" for="title">제목</label>
+                    <input type="text" name="title" class="form-control" id="title"
+                           placeholder="제목을 입력하세요" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="small mb-1 fw-bold" for="content">내용</label>
+                    <textarea name="content" class="form-control" id="content"
+                              rows="10" placeholder="내용을 입력하세요" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="small mb-1 fw-bold" for="files">이미지 첨부 (최대 5개)</label>
+                    <input type="file" name="files" class="form-control" id="files"
+                           accept="image/*" multiple>
+                    <div id="fileHelp" class="form-text text-muted">
+                        <i class="fas fa-info-circle me-1"></i>이미지 파일(jpg, png 등)만 업로드 가능합니다.
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="small mb-1" for="content">내용</label>
-                        <textarea name="content" class="form-control" id="content"
-                                  rows="10" placeholder="내용을 입력하세요" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small mb-1" for="files">이미지 첨부 (최대 5개)</label>
-                        <input type="file" name="files" class="form-control" id="files"
-                               accept="image/*" multiple>
-                        <div id="fileHelp" class="form-text">이미지 파일만 업로드 가능합니다.</div>
-                    </div>
-
-                    <div class="d-flex justify-content-end border-top pt-3">
-                        <a th:href="@{/}" class="btn btn-secondary me-2">취소</a>
-                        <button type="submit" class="btn btn-primary px-4">게시하기</button>
-                    </div>
-                </form>
-            </div>
+                <div class="d-flex justify-content-end border-top pt-3 gap-2">
+                    <a th:href="@{/}" class="btn btn-secondary px-4 rounded-pill">취소</a>
+                    <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">게시하기</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.onclick = function(e) {
+                    e.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                    localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb-sidenav-toggled'));
+                };
+            }
+        });
+    </script>
+</div>
 </html>

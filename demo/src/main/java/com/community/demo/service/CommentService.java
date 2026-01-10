@@ -34,4 +34,7 @@ public interface CommentService {
 
     List<CommentDTO> getList(Long bno);
 
+    int modify(CommentDTO commentDTO);
+
+    int remove(Long cno);
 }

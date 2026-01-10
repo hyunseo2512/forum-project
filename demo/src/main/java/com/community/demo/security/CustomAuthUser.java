@@ -28,6 +28,15 @@ public class CustomAuthUser implements UserDetails, OAuth2User {
         this.attributes = attributes;
     }
 
+
+    /**
+     * 타임리프에서 principal.nickName 으로 접근할 수 있게 해주는 브릿지 메서드
+     */
+    public String getNickName() {
+        return user.getNickName();
+    }
+
+
     /**
      * OAuth2User 인터페이스 메서드: 소셜 서비스에서 받은 속성 정보 반환
      */

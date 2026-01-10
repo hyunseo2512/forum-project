@@ -1,153 +1,122 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
 <div layout:fragment="content" class="container-fluid px-4" th:with="board = ${board}">
-  <h1 class="mt-4">게시글 상세 보기</h1>
-  <ol class="breadcrumb mb-4">
-    <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
-    <li class="breadcrumb-item active">Board Detail</li>
-  </ol>
+    <style>
+        .carousel-container { background-color: #1a1a1a; border-radius: 8px; overflow: hidden; }
+        .carousel-inner, .carousel-item { height: 500px; }
+        .carousel-item img { width: 100%; height: 100%; object-fit: contain; }
+        .board-content { white-space: pre-wrap; word-break: break-all; min-height: 300px; line-height: 1.8; font-size: 1.05rem; color: #333; }
+        .detail-title-section { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+    </style>
 
-  <div class="row">
-    <div class="col-lg-8">
-      <div class="card mb-4 shadow">
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-header detail-title-section py-4 px-4">
+                    <div class="mb-2">
+                        <h1 class="fw-bold mb-0" style="font-size: 1.75rem;">[[${board.title}]]</h1>
+                    </div>
+                    <div class="text-muted d-flex align-items-center gap-3">
+                        <span><i class="fas fa-user-circle me-1 text-primary"></i><strong>[[${board.writer}]]</strong></span>
+                        <span><i class="fas fa-calendar-alt me-1"></i>[[${board.regDate != null ? #temporals.format(board.regDate, 'yyyy-MM-dd HH:mm') : '-'}]]</span>
+                        <span><i class="fas fa-eye me-1"></i>조회수 [[${board.readCount}]]</span>
+                    </div>
+                </div>
 
-        <div th:if="${board.fileList != null && !board.fileList.isEmpty()}"
-             id="boardImageCarousel" class="carousel slide card-img-top" data-bs-ride="carousel">
+                <div th:if="${board.fileList != null && !board.fileList.isEmpty()}" id="boardImageCarousel" class="carousel slide carousel-container" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <div th:each="file, iterStat : ${board.fileList}" class="carousel-item" th:classappend="${iterStat.first} ? 'active'">
+                            <img th:src="@{/view(fileName=${file.saveDir + '/' + file.uuid + '_' + file.fileName})}" class="d-block w-100" alt="board image">
+                        </div>
+                    </div>
+                    <th:block th:if="${board.fileList.size() > 1}">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                    </th:block>
+                </div>
 
-          <div class="carousel-indicators">
-            <button th:each="file, iterStat : ${board.fileList}"
-                    type="button"
-                    data-bs-target="#boardImageCarousel"
-                    th:data-bs-slide-to="${iterStat.index}"
-                    th:classappend="${iterStat.first} ? 'active'"
-                    aria-current="true">
-            </button>
-          </div>
+                <div class="card-body px-4 py-4">
+                    <div class="board-content">[[${board.content}]]</div>
+                </div>
 
-          <div class="carousel-inner bg-dark" style="max-height: 500px; overflow: hidden;">
-            <div th:each="file, iterStat : ${board.fileList}"
-                 class="carousel-item"
-                 th:classappend="${iterStat.first} ? 'active'">
-              <img th:src="|/view?fileName=${file.saveDir}/${file.uuid}_${file.fileName}|"
-                   class="d-block w-100 h-100"
-                   style="object-fit: contain;" alt="board image">
+                <div class="card-footer bg-white border-top px-4 py-4">
+                    <h5 class="fw-bold mb-4"><i class="fas fa-comments me-2 text-primary"></i>댓글 ([[${board.cmtQty}]])</h5>
+
+                    <div class="input-group mb-4" sec:authorize="isAuthenticated()">
+                        <span class="input-group-text bg-primary text-white border-0"
+                              th:text="${#authentication.principal.user.nickName}">닉네임</span>
+                        <input type="text" id="cmtText" class="form-control" placeholder="따뜻한 댓글을 남겨주세요.">
+                        <button type="button" id="cmtAddBtn" class="btn btn-primary px-4">등록</button>
+                    </div>
+
+                    <div class="alert alert-light border text-center py-3 mb-4" sec:authorize="isAnonymous()">
+                        <a th:href="@{/user/login}" class="fw-bold text-primary text-decoration-none">로그인</a> 후 댓글 작성이 가능합니다.
+                    </div>
+
+                    <ul class="list-group list-group-flush mb-3" id="cmtListArea"></ul>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" id="moreBtn" style="display: none;">댓글 더보기</button>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <button class="carousel-control-prev" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#boardImageCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
+            <div class="mb-5 d-flex justify-content-between align-items-center">
+                <a th:href="@{/}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm"><i class="fas fa-list me-1"></i> 목록으로</a>
+
+                <div sec:authorize="isAuthenticated()">
+                    <th:block th:if="${#authentication.principal.user.nickName == board.writer}">
+                        <a th:href="@{/board/modify(bno=${board.bno})}" class="btn btn-warning text-white rounded-pill px-4 ms-2 shadow-sm">
+                            <i class="fas fa-edit me-1"></i> 수정하기
+                        </a>
+                    </th:block>
+                </div>
+            </div>
         </div>
 
-        <div class="card-header d-flex align-items-center justify-content-between">
-          <div>
-            <i class="fas fa-file-alt me-1"></i>
-            <strong class="fs-4">[[${board.title}]]</strong>
-          </div>
-          <div class="text-muted small">
-            <span><i class="fas fa-user me-1"></i>[[${board.writer}]]</span>
-            <span class="ms-3"><i class="fas fa-calendar-alt me-1"></i>[[${#temporals.format(board.regDate, 'yyyy-MM-dd HH:mm')}]]</span>
-            <span class="ms-3"><i class="fas fa-eye me-1"></i>[[${board.readCount}]]</span>
-          </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white fw-bold"><i class="fas fa-info-circle me-2"></i>게시글 정보</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between py-3">
+                            <span class="text-muted">최종 수정</span>
+                            <span class="fw-bold">[[${board.modDate != null ? #temporals.format(board.modDate, 'yyyy-MM-dd HH:mm') : #temporals.format(board.regDate, 'yyyy-MM-dd HH:mm')}]]</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <img th:unless="${board.fileList != null && !board.fileList.isEmpty()}"
-             src="https://dummyimage.com/850x350/dee2e6/6c757d.jpg" class="card-img-top" alt="no image" />
-
-
-
-        <div class="card-body" style="min-height: 300px;">
-          <p class="card-text text-dark" style="white-space: pre-wrap;">[[${board.content}]]</p>
-        </div>
-
-        <div class="card-footer bg-light">
-          <h5 class="mb-3"><i class="fas fa-comments me-1"></i> Comments ([[${board.cmtQty}]])</h5>
-
-          <div class="input-group mb-3" sec:authorize="isAuthenticated()">
-            <span class="input-group-text bg-primary text-white" id="cmtWriter">[[${#authentication.name}]]</span>
-            <input type="text" id="cmtText" class="form-control" placeholder="댓글을 입력하세요...">
-            <button type="button" id="cmtAddBtn" class="btn btn-primary">등록</button>
-          </div>
-
-          <ul class="list-group list-group-flush" id="cmtListArea">
-          </ul>
-
-          <div class="d-grid mt-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="moreBtn" style="display: none;">더보기</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="mb-4">
-        <a th:href="@{/}" class="btn btn-secondary">목록으로</a>
-        <a th:if="${#authentication.name == board.writer}"
-           th:href="@{/board/modify(bno=${board.bno})}" class="btn btn-warning text-white">수정하기</a>
-      </div>
     </div>
 
-    <div class="col-lg-4">
-      <div class="card mb-4">
-        <div class="card-header"><i class="fas fa-list me-1"></i>카테고리</div>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0 row">
-            <li class="col-6"><a href="#!">Spring Boot</a></li>
-            <li class="col-6"><a href="#!">Java 17</a></li>
-            <li class="col-6"><a href="#!">JPA/Hibernate</a></li>
-            <li class="col-6"><a href="#!">Thymeleaf</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="card mb-4">
-        <div class="card-header"><i class="fas fa-info-circle me-1"></i>공지사항</div>
-        <div class="card-body small">게시판 이용 시 비방이나 욕설은 삼가주시기 바랍니다. 이미지 업로드는 최대 5장까지 가능합니다.</div>
-      </div>
-    </div>
-  </div>
 
-  <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">댓글 수정</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="text" class="form-control" id="cmtTextMod">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-          <button type="button" class="btn btn-primary" id="cmtModBtn">수정 완료</button>
-          <button type="button" class="btn btn-danger" id="cmtDelBtn">삭제</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <script th:inline="javascript">
-    const bnoValue = [[${board.bno}]];
-    const currentUser = [[${#authentication.name}]];
+    <script th:inline="javascript">
+        const bnoValue = [[${board.bno}]];
 
-    // 사이드바 토글이 boardComment.js 에러로 인해 멈추는 것을 방지하기 위한 강제 바인딩
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        if (sidebarToggle) {
-            sidebarToggle.onclick = function(e) {
-                e.preventDefault();
-                document.body.classList.toggle('sb-sidenav-toggled');
-            };
-        }
-    });
-  </script>
-  <script th:src="@{/js/boardComment.js}"></script>
+        // JS 에러 방지용 null 체크
+        /*<![CDATA[*/
+        let currentUser = 'anonymousUser';
+        /*[# sec:authorize="isAuthenticated()"]*/
+        currentUser = /*[[${#authentication.principal.user.nickName}]]*/ 'anonymousUser';
+        /*[/]*/
+        /*]]>*/
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.onclick = function(e) {
+                    e.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                };
+            }
+            if (typeof spreadCommentList === 'function') { spreadCommentList(bnoValue); }
+        });
+    </script>
+    <script th:src="@{/js/boardComment.js}"></script>
 </div>
 </html>

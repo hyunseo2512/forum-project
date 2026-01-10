@@ -46,5 +46,15 @@ public class CommentServiceImpl implements CommentService {
                 .toList();
     }
 
+    @Override
+    public int modify(CommentDTO commentDTO) {
+        return 0;
+    }
+
+    @Override
+    public int remove(Long cno) {
+        return 0;
+    }
+
 
 }

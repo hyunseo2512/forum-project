@@ -40,5 +40,17 @@
 
 <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/dist/js/scripts.js}"></script>
+<script>
+    // scripts.js 또는 layout.html 하단
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.onclick = function(e) {
+                e.preventDefault();
+                document.body.classList.toggle('sb-sidenav-toggled');
+            };
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,185 +1,150 @@
 console.log("boardComment.js in");
-console.log(bnoValue);
 
-document.getElementById("cmtAddBtn").addEventListener("click", () => {
-  const cmtText = document.getElementById("cmtText");
-  const cmtWriter = document.getElementById("cmtWriter");
+// [1] 댓글 등록 버튼 (로그인 유저 전용)
+const cmtAddBtn = document.getElementById("cmtAddBtn");
+if (cmtAddBtn) {
+    cmtAddBtn.addEventListener("click", () => {
+        const cmtText = document.getElementById("cmtText");
+        const cmtWriter = document.getElementById("cmtWriter");
 
-  if (cmtText == null || cmtText.value == "") {
-    alert("댓글 입력");
-    cmtText.focus();
-    return false;
-  }
-  let cmtData = {
-    bno: bnoValue,
-    writer: cmtWriter.innerText,
-    content: cmtText.value,
-  };
-  //   전송
-  postCommentToServer(cmtData).then((result) => {
-    if (result == "1") {
-      alert("등록 성공");
-      // 다시 입력할 수 있도록 댓글 창을 비우고, 포커스 맞추기
-      cmtText.value = "";
-      cmtText.focus();
-    }
-    // 댓글 출력 호출
-    spreadCommentList(bnoValue);
-  });
-});
+        if (!cmtText.value) {
+            alert("댓글 내용을 입력하세요.");
+            cmtText.focus();
+            return;
+        }
 
-// 화면에 출력하는 함수
-// 만약에 페이지가 안들어오면 옵셔널 1
+        let cmtData = {
+            bno: bnoValue,
+            writer: cmtWriter.innerText,
+            content: cmtText.value,
+        };
+
+        postCommentToServer(cmtData).then((result) => {
+            if (result === "1") {
+                alert("댓글이 등록되었습니다.");
+                cmtText.value = "";
+                spreadCommentList(bnoValue);
+            }
+        });
+    });
+}
+
+// [2] 댓글 리스트 출력 함수
 function spreadCommentList(bno) {
-  commentListFromServer(bno).then((result) => {
-    console.log(result);
-    const ul = document.getElementById("cmtListArea");
-    if (result.list.length > 0) {
-      // 댓글이 있을 경우
+    commentListFromServer(bno).then((result) => {
+        const ul = document.getElementById("cmtListArea");
 
-      let li = "";
-      for (let comment of result.list) {
-        li += `<li class="list-group-item" data-cno=${comment.cno}>`;
-        li += `<div class="ms-2 me-auto">`;
-        li += `<div class="fw-bold">${comment.writer}</div>`;
-        li += `${comment.content}`;
-        li += `</div>`;
-        li += `<span class="badge text-bg-primary">${comment.regDate}</span>`;
-//        if(loginUser == comment.writer){
-          li += `<button type="button" class="btn btn-sm btn-outline-warning mod" data-bs-toggle="modal" data-bs-target="#commentModal">e</button>`;
-          li += `<button type="button" class="btn btn-sm btn-outline-danger del">x</button>`;
-//        }
-        li += `</li>`;
-      }
-      ul.innerHTML += li;
-    } else {
-      // 댓글이 없을 경우
-      ul.innerHTML = `<li class="list-group-item">Comment List Empty</li>`;
-    }
-  });
+        // 서버에서 반환한 형식이 리스트 자체인 경우를 대비해 result.length 체크
+        if (result && result.length > 0) {
+            ul.innerHTML = ""; // 기존 리스트 초기화
+            let li = "";
+            for (let comment of result) {
+                li += `<li class="list-group-item border-0 border-bottom py-3" data-cno="${comment.cno}">`;
+                li += `  <div class="d-flex justify-content-between align-items-start">`;
+                li += `    <div class="ms-2 me-auto">`;
+                li += `      <div class="fw-bold mb-1">${comment.writer}</div>`;
+                li += `      <span class="cmt-content-text">${comment.content}</span>`;
+                li += `    </div>`;
+                li += `    <div class="text-end">`;
+                li += `      <small class="text-muted d-block mb-2">${comment.regDate}</small>`;
+
+                // [로그인 유저 권한 체크] 작성자와 현재 로그인 유저가 같을 때만 버튼 노출
+                if (typeof currentUser !== 'undefined' && currentUser === comment.writer) {
+                    li += `      <button type="button" class="btn btn-sm btn-outline-warning mod" data-bs-toggle="modal" data-bs-target="#commentModal">수정</button>`;
+                    li += `      <button type="button" class="btn btn-sm btn-outline-danger del">삭제</button>`;
+                }
+
+                li += `    </div>`;
+                li += `  </div>`;
+                li += `</li>`;
+            }
+            ul.innerHTML = li;
+        } else {
+            ul.innerHTML = `<li class="list-group-item text-muted text-center py-4">등록된 댓글이 없습니다.</li>`;
+        }
+    });
 }
 
+// [3] 수정/삭제 이벤트 위임
 document.addEventListener("click", (e) => {
-  if (e.target.id == "moreBtn") {
-    // 더보기 버튼 => 남아있는 게시글 5개를 더 출력 => 비동기 호출
-    spreadCommentList(bnoValue, parseInt(e.target.dataset.page));
-  }
-  if (e.target.classList.contains("mod")) {
-    // 수정 버튼 : 수정할 데이터(content, writer)를 찾아서 => modal 창에 띄우기
-    // nextSibling : 같은 부모의 다음 형제 찾기
-    let li = e.target.closest("li"); // 내 버튼이 속해있는 li 가져오기
+    // 수정 버튼 클릭 시 모달창에 데이터 채우기
+    if (e.target.classList.contains("mod")) {
+        const li = e.target.closest("li");
+        const cno = li.dataset.cno;
+        const writer = li.querySelector(".fw-bold").innerText;
+        const content = li.querySelector(".cmt-content-text").innerText;
 
-    //return nextNode => nodeValue 텍스트만 분리
-    let cmtText = li.querySelector(".fw-bold").nextSibling;
-    let cmtWriter = li.querySelector(".fw-bold").innerText;
-    let cno = li.dataset.cno;
+        document.getElementById("cmtTextMod").value = content;
+        document.getElementById("cmtModBtn").setAttribute("data-cno", cno);
+        // 모달 헤더나 어딘가에 작성자 표시가 필요하다면 추가 가능
+    }
 
-    document.getElementById(
-      "cmtWriterMod"
-    ).innerHTML = `no.${cno} <b>${cmtWriter}</b>`;
-    document.getElementById("cmtTextMod").value = cmtText.nodeValue;
+    // 모달 내 수정 완료 버튼
+    if (e.target.id === "cmtModBtn") {
+        const modData = {
+            cno: e.target.dataset.cno,
+            content: document.getElementById("cmtTextMod").value
+        };
+        updateCommentToServer(modData).then(result => {
+            if (result === "1") {
+                alert("댓글이 수정되었습니다.");
+                document.querySelector(".btn-close").click();
+                spreadCommentList(bnoValue);
+            }
+        });
+    }
 
-    // cmtModBtn => data-cno="" 속성 추가
-    document.getElementById("cmtModBtn").setAttribute("data-cno", cno);
-  }
-  if (e.target.id == "cmtModBtn") {
-    // 모달 수정 버튼
-    // 모달 수정 버튼을 클릭하면 => 수정 (비동기 처리)
-    // cno, content => 서버로 전송 => update
-    let modData = {
-      cno: e.target.dataset.cno,
-      content: document.getElementById("cmtTextMod").value,
-    };
-    // 비동기 함수 만들어서 전송
-    updateCommentToServer(modData).then((result) => {
-      if (result == "1") {
-        alert("수정 성공");
-      }
-      // 변경 댓글 출력
-      spreadCommentList(bnoValue);
-
-      // 모달창 닫기
-      document.querySelector(".btn-close").click();
-    });
-  }
-  if (e.target.classList.contains("del")) {
     // 삭제 버튼
-    let li = e.target.closest("li");
-    removeCommentToServer(li.dataset.cno).then((result) => {
-      if (result == 1) {
-        alert("삭제 성공");
-      } else {
-        alert("삭제 실패");
-      }
-      spreadCommentList(bnoValue);
-    });
-  }
+    if (e.target.classList.contains("del")) {
+        if (!confirm("댓글을 삭제하시겠습니까?")) return;
+        const li = e.target.closest("li");
+        removeCommentToServer(li.dataset.cno).then(result => {
+            if (result === "1") {
+                alert("댓글이 삭제되었습니다.");
+                spreadCommentList(bnoValue);
+            }
+        });
+    }
 });
 
-// ------------- 비동기 데이터 함수 --------------
-// modify
-async function updateCommentToServer(modData) {
-  try {
-    const url = "/comment/modify";
-    const config = {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        [csrfHeader] : csrfToken
-      },
-      body: JSON.stringify(modData),
-    };
-    const resp = await fetch(url, config);
-    const result = await resp.text();
-    return result;
-  } catch (error) {}
-}
-
-// list
-async function commentListFromServer(bno) {
-  try {
-    const resp = await fetch("/comment/list/" + bno);
-    const result = await resp.json();
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-// post
+// [4] 서버 통신 함수들
 async function postCommentToServer(cmtData) {
-  try {
-    const url = "/comment/post";
-    const config = {
-      method: "post",
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify(cmtData),
-    };
-    const resp = await fetch(url, config);
-    const result = await resp.text();
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+    try {
+        const resp = await fetch("/comment/post", {
+            method: "post",
+            headers: { "content-type": "application/json; charset=utf-8" },
+            body: JSON.stringify(cmtData)
+        });
+        return await resp.text();
+    } catch (err) { console.error(err); }
 }
 
-// remove
+async function commentListFromServer(bno) {
+    try {
+        const resp = await fetch("/comment/list/" + bno);
+        return await resp.json();
+    } catch (err) { console.error(err); }
+}
+
+async function updateCommentToServer(modData) {
+    try {
+        const resp = await fetch("/comment/modify", {
+            method: "put",
+            headers: { "content-type": "application/json; charset=utf-8" },
+            body: JSON.stringify(modData)
+        });
+        return await resp.text();
+    } catch (err) { console.error(err); }
+}
+
 async function removeCommentToServer(cno) {
-  try {
-    const url = `/comment/remove/${cno}`;
-    const config = {
-      method: "delete",
-      header:{
-        [csrfHeader] : csrfToken
-      }
-    };
-
-    const resp = await fetch(url, config);
-    const result = await resp.text();
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+    try {
+        const resp = await fetch("/comment/remove/" + cno, { method: "delete" });
+        return await resp.text();
+    } catch (err) { console.error(err); }
 }
+
+// 초기 로딩
+document.addEventListener('DOMContentLoaded', () => {
+    spreadCommentList(bnoValue);
+});

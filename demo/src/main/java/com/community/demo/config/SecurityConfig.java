@@ -36,7 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/user/list").hasAnyRole("ADMIN")
                         .requestMatchers("/","/dist/**", "/js/**","/image/**", "/upload/**",
                                 "/board/detail", "/comment/list/**",
-                                "/user/join","/user/login","/error/**"
+                                "/user/join","/user/login","/error/**",
+                                "/view"
                         ).permitAll()
                         // 나머지 모든 요청은 인증 필요 (보안 강화)
                         .anyRequest().authenticated()

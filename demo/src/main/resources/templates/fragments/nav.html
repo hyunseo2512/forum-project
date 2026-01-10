@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
 
 <div th:fragment="nav" id="layoutSidenav_nav" class="bg-light"> <nav class="sb-sidenav accordion" id="sidenavAccordion">
   <div class="sb-sidenav-menu">
@@ -64,7 +67,14 @@
     </div>
   </div>
   <div class="sb-sidenav-footer">
-    <div class="small">Logged in as: [[${#authentication.name}]]</div>
+    <div class="small">Logged in as:</div>
+    <span sec:authorize="isAuthenticated()" class="fw-bold">
+    [[${#authentication.principal.nickName}]]
+  </span>
+    <span sec:authorize="isAnonymous()" class="text-muted">
+    Guest
+  </span>
+    <br>
     Start Bootstrap
   </div>
 </nav>
