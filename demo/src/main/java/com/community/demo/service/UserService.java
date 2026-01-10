@@ -57,4 +57,6 @@ public interface UserService {
     String register(UserDTO userDTO);
 
     List<UserDTO> getList();
+
+    void modify(UserDTO userDTO);
 }

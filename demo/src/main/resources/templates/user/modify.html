@@ -2,8 +2,102 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
-<div layout:fragment="content" class="container-md">
-    <span>Spring boot_JPA Project</span>
+<div layout:fragment="content">
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">My Page</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile Settings</li>
+        </ol>
+
+        <div class="row">
+            <div class="col-xl-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-user me-1"></i>
+                        Profile Summary
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-circle fa-7x text-secondary"></i>
+                        </div>
+                        <h4 th:text="${user.nickName}">Nickname</h4>
+                        <p class="text-muted" th:text="${user.email}">user@example.com</p>
+
+                        <div class="mt-2">
+                            <span th:each="auth : ${user.authList}"
+                                  class="badge bg-primary me-1"
+                                  th:text="${auth.auth.name()}">ROLE_USER</span>
+                        </div>
+                    </div>
+                    <div class="card-footer small text-muted">
+                        Last Login: <span th:text="${#temporals.format(user.lastLogin, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-edit me-1"></i>
+                        Account Details
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/user/modify}" method="post">
+                            <div class="mb-3">
+                                <label class="small mb-1" for="inputEmail">Email Address (ID)</label>
+                                <input class="form-control" id="inputEmail" type="email"
+                                       th:value="${user.email}" readonly style="background-color: #e9ecef;">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="small mb-1" for="inputNickName">Nickname</label>
+                                <input class="form-control" id="inputNickName" name="nickName" type="text"
+                                       placeholder="Enter your nickname" th:value="${user.nickName}">
+                            </div>
+
+                            <div th:if="${!#strings.startsWith(user.pwd, '{noop}social_login')}" class="row gx-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="small mb-1" for="inputPassword">New Password</label>
+                                    <input class="form-control" id="inputPassword" name="pwd" type="password" placeholder="Enter new password">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small mb-1" for="confirmPassword">Confirm Password</label>
+                                    <input class="form-control" id="confirmPassword" type="password" placeholder="Confirm new password">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="small mb-1">Joined Date</label>
+                                <div class="form-control-plaintext ps-2 border rounded bg-light"
+                                     th:text="${#temporals.format(user.regDate, 'yyyy-MM-dd HH:mm')}"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-secondary me-2" type="button" onclick="history.back()">Cancel</button>
+                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-left-danger shadow h-100 py-2 mb-4" style="border-left: 0.25rem solid #e74a3b !important;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Danger Zone</div>
+                                <div class="h6 mb-0 text-gray-800">계정을 삭제하면 모든 데이터가 복구 불가능합니다.</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" type="button">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+</html>

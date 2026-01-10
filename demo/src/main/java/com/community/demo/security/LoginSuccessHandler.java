@@ -19,28 +19,67 @@ import java.io.IOException;
 
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    RedirectStrategy redirectStrategy =
-            new DefaultRedirectStrategy();
-
-    RequestCache requestCache =
-            new HttpSessionRequestCache();
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RequestCache requestCache = new HttpSessionRequestCache();
 
     @Autowired
     private UserService userService;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        userService.lastLoginUpdate(authentication.getName());
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
 
-        HttpSession ses = request.getSession();
-        if(ses == null){
-            return;
-        }else {
+        // 1. 유저 식별자(이메일) 추출
+        String email = extractEmail(authentication);
+
+        // 2. 마지막 로그인 시간 업데이트
+        if (email != null) {
+            userService.lastLoginUpdate(email);
+        }
+
+        // 3. 세션 에러 메시지 제거
+        HttpSession ses = request.getSession(false);
+        if (ses != null) {
             ses.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
         }
 
+        // 4. 리다이렉트 처리 (로그인 전 페이지 또는 메인)
         SavedRequest savedRequest = requestCache.getRequest(request, response);
-        redirectStrategy.sendRedirect(request, response,
-                savedRequest != null ? savedRequest.getRedirectUrl(): "/");
+        String targetUrl = (savedRequest != null) ? savedRequest.getRedirectUrl() : "/";
+
+        redirectStrategy.sendRedirect(request, response, targetUrl);
+    }
+
+    // 로그인 방식에 따라 이메일을 추출하는 메서드
+    private String extractEmail(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+
+        // 일반 로그인 (UserDetails)
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            return ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        }
+
+        // 소셜 로그인 (OAuth2User)
+        else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+            var oAuth2User = (org.springframework.security.oauth2.core.user.OAuth2User) principal;
+            var attributes = oAuth2User.getAttributes();
+
+            // Google
+            if (attributes.containsKey("email")) {
+                return (String) attributes.get("email");
+            }
+            // Naver
+            if (attributes.containsKey("response")) {
+                var response = (java.util.Map<String, Object>) attributes.get("response");
+                return (String) response.get("email");
+            }
+            // Kakao
+            if (attributes.containsKey("kakao_account")) {
+                var kakaoAccount = (java.util.Map<String, Object>) attributes.get("kakao_account");
+                return (String) kakaoAccount.get("email");
+            }
+        }
+
+        return authentication.getName();
     }
 }

@@ -3,6 +3,8 @@ package com.community.demo.config;
 import com.community.demo.security.CustomUserService;
 import com.community.demo.security.LoginFailuerHandler;
 import com.community.demo.security.LoginSuccessHandler;
+import com.community.demo.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,14 +18,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -34,7 +38,8 @@ public class SecurityConfig {
                                 "/board/detail", "/comment/list/**",
                                 "/user/join","/user/login","/error/**"
                         ).permitAll()
-                        .anyRequest().permitAll()
+                        // 나머지 모든 요청은 인증 필요 (보안 강화)
+                        .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
                         .usernameParameter("email")
@@ -43,6 +48,10 @@ public class SecurityConfig {
                         .successHandler(authenticationSuccessHandler())
                         .failureHandler(authenticationFailureHandler())
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/user/login") // 소셜 로그인도 같은 페이지 사용
+                        .defaultSuccessUrl("/")
                 )
                 .logout(logout -> logout
                         .logoutUrl("/user/logout")

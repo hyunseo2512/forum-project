@@ -39,4 +39,16 @@ public class User extends TimeBase{
                 .auth(role)
                 .build());
     }
+
+    public User update(String nickName) {
+        this.nickName = nickName;
+        return this;
+    }
+
+    // 소셜 가입 시 기본 권한 체크 및 추가
+    public void setupDefaultRole() {
+        if (this.authList == null || this.authList.isEmpty()) {
+            this.addAuth(AuthRole.USER); // AuthRole.USER는 "USER" 또는 "ROLE_USER"를 가진 Enum
+        }
+    }
 }

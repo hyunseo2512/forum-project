@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -63,5 +64,24 @@ public class UserServiceImpl implements UserService{
     @Override
     public void lastLoginUpdate(String name) {
 
+    }
+
+    @Override
+    @Transactional
+    public void modify(UserDTO userDTO) {
+        // 1. 기존 유저 정보 가져오기 (권한 포함)
+        Optional<User> result = userRepository.findById(userDTO.getEmail());
+        User user = result.orElseThrow();
+
+        // 2. 닉네임 변경
+        user.setNickName(userDTO.getNickName());
+
+        // 3. 비밀번호 변경 (입력값이 있을 경우에만)
+        if (userDTO.getPwd() != null && !userDTO.getPwd().isEmpty()) {
+            user.setPwd(passwordEncoder.encode(userDTO.getPwd()));
+        }
+
+        // 4. 변경 감지(Dirty Checking)에 의해 자동으로 update 쿼리 실행
+        userRepository.save(user);
     }
 }
