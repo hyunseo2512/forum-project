@@ -20,6 +20,10 @@ public class LoginFailuerHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+        // ★ 콘솔에 찍히는 이 에러 메시지를 확인해야 합니다!
+        System.out.println("### 로그인 실패 원인: " + exception.getMessage());
+        exception.printStackTrace(); // 상세 스택트레이스 출력
+
         String errorMessage;
         String LoginFailedEmail = request.getParameter("email");
 

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,11 +23,26 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // 1. PasswordEncoder (기존 유지)
     @Bean
     PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    // 2. UserDetailsService 빈 (이름을 userDetailsService로 고정)
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new CustomUserService();
+    }
+
+    // ★ 3. 핵심: AuthenticationProvider 추가 (이게 없어서 404/실패가 뜬 것입니다)
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,14 +50,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/user/list").hasAnyRole("ADMIN")
-                        .requestMatchers("/","/dist/**", "/js/**","/image/**", "/upload/**",
+                        .requestMatchers("/", "/dist/**", "/js/**", "/image/**", "/upload/**",
                                 "/board/detail", "/comment/list/**",
-                                "/user/join","/user/login","/error/**",
-                                "/view"
+                                "/user/join", "/user/login", "/error/**", "/view"
                         ).permitAll()
-                        // 나머지 모든 요청은 인증 필요 (보안 강화)
                         .anyRequest().authenticated()
                 )
+                // 시큐리티가 위에서 만든 authenticationProvider를 사용하도록 자동으로 설정됩니다.
                 .formLogin(login -> login
                         .usernameParameter("email")
                         .passwordParameter("pwd")
@@ -51,36 +66,23 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/user/login") // 소셜 로그인도 같은 페이지 사용
-                        .defaultSuccessUrl("/")
+                        .loginPage("/user/login")
+                        .defaultSuccessUrl("/", true)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/user/logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/")
                 )
                 .build();
     }
 
     @Bean
-    UserDetailsService customUserService(){
-        return new CustomUserService();
-    }
-
-    @Bean
-    AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    AuthenticationSuccessHandler authenticationSuccessHandler(){
+    public AuthenticationSuccessHandler authenticationSuccessHandler(){
         return new LoginSuccessHandler();
     }
 
     @Bean
-    AuthenticationFailureHandler authenticationFailureHandler(){
+    public AuthenticationFailureHandler authenticationFailureHandler(){
         return new LoginFailuerHandler();
     }
 }
